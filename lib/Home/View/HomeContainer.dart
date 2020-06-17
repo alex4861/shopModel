@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'Components/CarouselHome.dart';
@@ -6,17 +7,36 @@ import 'Components/VerticalContents.dart';
 
 
 
-class HomeContainer extends StatelessWidget{
+class HomeContainer extends StatefulWidget{
   final Destination destination;
   final String appName;
 
   const HomeContainer({Key key, this.destination, this.appName}) : super(key: key);
 
   @override
+  _HomeContainerState createState() => _HomeContainerState();
+}
+
+class _HomeContainerState extends State<HomeContainer> {
+
+  int numberItems = 0;
+  @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-        appBar: AppBar(title: Text(appName),),
+        appBar: AppBar(
+          title: Text(widget.appName),
+          actions: <Widget>[
+            CupertinoButton(
+              child: Badge(
+                badgeContent: Text(numberItems <=99 ? "$numberItems": "+99", style: TextStyle(color: Colors.white, fontSize: 9),),
+                child: Icon(Icons.shopping_cart, color: Colors.white,),
+                animationType: BadgeAnimationType.scale	,
+              ),
+              onPressed: deleteAll,
+            )
+          ],
+        ),
         body: Container(
           child:  ListView(
             children: [
@@ -58,6 +78,17 @@ class HomeContainer extends StatelessWidget{
         )
     );
   }
+
+  void addToCart(){
+    setState(() {
+      numberItems += 1;
+    });
+  }
+  void deleteAll(){
+    setState(() {
+      numberItems = 0;
+    });
+  }
   Widget _header(BuildContext context, {@required String title, String buttonTitle, buttonAction: Function}){
     return ListTile(
       title: Text(title ?? "", style: boldStyle(),),
@@ -81,7 +112,7 @@ class HomeContainer extends StatelessWidget{
                   Text("Producto de ejemplo"),
                   Text("\$200"),
                   Padding(
-                    child: OutlineButton(onPressed: (){}, child: Text("Agregar al carrito", textAlign: TextAlign.center,), ),
+                    child: OutlineButton(onPressed: addToCart, child: Text("Agregar al carrito", textAlign: TextAlign.center,), ),
                     padding: EdgeInsets.symmetric(vertical: 6),
                   )
                 ],
@@ -94,7 +125,6 @@ class HomeContainer extends StatelessWidget{
 
     );
   }
-
 }
 class NavigationFinish extends StatelessWidget{
   const NavigationFinish({ Key key, this.destination }) : super(key: key);
