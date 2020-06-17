@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shopmodel/Home/View/Home.dart';
+import 'package:shopmodel/MainComponents/View/MainContainer.dart';
 
 import '../../main.dart';
+import 'ProfileContainer.dart';
 
 class ProfileNavigation extends StatefulWidget{
   final Destination destination;
@@ -30,7 +31,7 @@ class _ProfileNavigationState extends State<ProfileNavigation> {
           builder: (BuildContext context) {
             switch(settings.name){
               case '/':
-                return ProfileContainer(destination: widget.destination, appName: widget.appName,);
+                return ProfileContainer(destination: widget.destination,);
               case '/next':
                 return Container();
             }
@@ -43,22 +44,43 @@ class _ProfileNavigationState extends State<ProfileNavigation> {
 }
 
 
-class ProfileContainer extends StatelessWidget{
+
+
+class MyAccountNavigation extends StatefulWidget{
   final Destination destination;
   final String appName;
+  final VoidCallback onNavigation;
+  final Key navigatorKey;
 
-  const ProfileContainer({Key key, this.destination, this.appName}) : super(key: key);
+  const MyAccountNavigation({Key key, this.destination, this.appName, this.onNavigation, this.navigatorKey}) : super(key: key);
 
+  @override
+  _MyAccountNavigationState createState() => _MyAccountNavigationState();
+}
+
+class _MyAccountNavigationState extends State<MyAccountNavigation> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Scaffold(
-      appBar: AppBar(),
-      body: Container(
-        child: Center(
-          child: Text("Profile"),
-        ),
-      ),
+    return Navigator(
+      key: widget.navigatorKey,
+      observers: <NavigatorObserver>[
+        ViewNavigatorObserver(widget.onNavigation),
+      ],
+      onGenerateRoute: (RouteSettings settings){
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (BuildContext context) {
+            switch(settings.name){
+              case '/':
+                return ProfileContainer(destination: widget.destination,);
+              case '/next':
+                return Container();
+            }
+            return null;
+          },
+        );
+      },
     );
   }
 }

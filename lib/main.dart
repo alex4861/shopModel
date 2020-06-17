@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shopmodel/Home/View/Home.dart';
+import 'package:shopmodel/MainComponents/View/MainContainer.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
-      home: Home(appName: "GooPrices",),
+      home: MainContainer(appName: "GooPrices",),
     );
   }
 }

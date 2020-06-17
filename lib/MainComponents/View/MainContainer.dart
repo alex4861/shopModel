@@ -4,22 +4,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:shopmodel/Home/View/AppBarHome.dart';
+import 'package:shopmodel/Home/View/HomeNavigation.dart';
 import 'package:shopmodel/Profile/View/ProfileNavigation.dart';
-import 'BottomItems.dart';
-import 'ContainerHome.dart';
+import '../../Home/View/HomeContainer.dart';
 
-class Home extends StatefulWidget{
+class MainContainer extends StatefulWidget{
 
   final String appName;
 
-  const Home({Key key, @required this.appName}) : super(key: key);
+  const MainContainer({Key key, @required this.appName}) : super(key: key);
 
   @override
-  _HomeState createState() => _HomeState();
+  _MainContainerState createState() => _MainContainerState();
 }
 
-class _HomeState extends State<Home>  with TickerProviderStateMixin<Home>{
+class _MainContainerState extends State<MainContainer>  with TickerProviderStateMixin<MainContainer>{
   List<GlobalKey> _destinationKeys;
   List<GlobalKey<NavigatorState>> _navigatorKeys;
   List<AnimationController> _faders;
@@ -119,13 +118,13 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin<Home>{
     );
   }
 
+
+  //If isFromBack == true, then change to index and pop the navigation
   void _onItemTapped(int index, {bool isFromBack = false}){
     setState(() {
-      if( Platform.isIOS){
         if(index == _selectedIndex){
           checkWillPop();
         }
-      }
       _selectedIndex = index;
       if(index == 0 && isFromBack){
         final NavigatorState navigator = _navigatorKeys[_selectedIndex].currentState;
@@ -138,8 +137,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin<Home>{
   Future<bool> checkWillPop() async{
     final NavigatorState navigator = _navigatorKeys[_selectedIndex].currentState;
     if (_selectedIndex != 0 && !navigator.canPop()){// if selected index isn't 0 and not can pop
-      _onItemTapped(0, isFromBack: true);
-      debugPrint(navigator.canPop().toString());
+      _onItemTapped(0);
       return false;
     }
     else if (!navigator.canPop()) {//if is false, if not can pop
@@ -155,18 +153,19 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin<Home>{
 
 
   final List<Destination> _children = [
-    Destination('Inicio', Icons.home, Colors.teal,0, ContainerHome()),
-    Destination('Carro', Icons.shopping_basket, Colors.cyan,1, Scaffold(appBar:  AppBar(),)),
-    Destination('Lista de deseos', Icons.favorite, Colors.orange,2, Scaffold(appBar:  AppBar(),)),
-    Destination('Mi cuenta', Icons.account_circle, Colors.blue,3, Scaffold(appBar:  AppBar(),))
+    Destination('Inicio', Icons.home, Colors.teal,0),
+    Destination('Carro', Icons.shopping_basket, Colors.cyan,1, ),
+    Destination('Lista de deseos', Icons.favorite, Colors.orange,2),
+    Destination('Mi cuenta', Icons.account_circle, Colors.blue,3)
   ];
 
   Widget getContent( Destination destination){
 
     switch(destination.index){
       case 0:
-        return ContainerHome(
+        return HomeNavigation(
           destination: destination,
+          appName: widget.appName,
           navigatorKey: _navigatorKeys[destination.index],
           onNavigation: () {
             _hide.forward();
@@ -192,12 +191,11 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin<Home>{
 }
 
 class Destination {
-  const Destination(this.title, this.icon, this.color, this.index, this.content);
+  const Destination(this.title, this.icon, this.color, this.index);
   final String title;
   final IconData icon;
   final MaterialColor color;
   final int index;
-  final Widget content;
 
 }
 
