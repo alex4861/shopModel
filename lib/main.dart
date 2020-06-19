@@ -11,9 +11,9 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.deepPurple,
       ),
-      home: MainContainer(appName: "GooPrices",),
+      home: MainContainer(appName: "shopModelTest ",),
     );
   }
 }

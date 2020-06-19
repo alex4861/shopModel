@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shopmodel/MainComponents/View/MainContainer.dart';
+import 'package:shopmodel/ProductPreview/View/ProductPreviewContainer.dart';
 
 import '../../main.dart';
 import 'HomeContainer.dart';
+import 'NavigationFinish.dart';
 
 class HomeNavigation extends StatefulWidget{
 
@@ -34,7 +36,7 @@ class _HomeNavigationState extends State<HomeNavigation> {
               case '/':
                 return HomeContainer(destination: widget.destination, appName: widget.appName,);
               case '/next':
-                return NavigationFinish(destination: widget.destination);
+                return ProductPreviewContainer(destination: widget.destination,);
             }
             return null;
           },

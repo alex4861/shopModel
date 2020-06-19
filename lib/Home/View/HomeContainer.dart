@@ -1,6 +1,9 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shopmodel/Home/Model/HomeModel.dart';
+import 'package:shopmodel/Home/ViewModel/HomeViewModel.dart';
+import 'package:shopmodel/ProductPreview/View/ProductPreviewContainer.dart';
 import 'Components/CarouselHome.dart';
 import '../../MainComponents/View/MainContainer.dart';
 import 'Components/VerticalContents.dart';
@@ -19,19 +22,22 @@ class HomeContainer extends StatefulWidget{
 
 class _HomeContainerState extends State<HomeContainer> {
 
+
   int numberItems = 0;
+
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.appName),
+          title: Row(children: <Widget>[Text(widget.appName), Icon(Icons.insert_emoticon)],),
           actions: <Widget>[
+            CupertinoButton(child: Icon(CupertinoIcons.search, color: Colors.white,), padding: EdgeInsets.all(0), onPressed: (){},minSize: 10,),
             CupertinoButton(
               child: Badge(
                 badgeContent: Text(numberItems <=99 ? "$numberItems": "+99", style: TextStyle(color: Colors.white, fontSize: 9),),
                 child: Icon(Icons.shopping_cart, color: Colors.white,),
-                animationType: BadgeAnimationType.scale	,
+                animationType: BadgeAnimationType.fade	,
               ),
               onPressed: deleteAll,
             )
@@ -41,53 +47,50 @@ class _HomeContainerState extends State<HomeContainer> {
           child:  ListView(
             children: [
               CarouselHome(),
-              _header(context, title: "Categorías", buttonTitle: "Más categoríaas", buttonAction: (){ Navigator.pushNamed(context, "/next");}),
-              SizedBox(
-                height: 100,
-                child: VerticalContents(),
-              ),
-              _header(context, title: "Frutas y verduras", buttonTitle: "Ver más", buttonAction: (){Navigator.pushNamed(context, "/next");}),
-              SizedBox(
-                  height: 250,
-                  child: _items(context)
 
-              ),
-              _header(context, title: "Congelados", buttonTitle: "Ver más", buttonAction: (){Navigator.pushNamed(context, "/next");}),
-              SizedBox(
-                  height: 250,
-                  child: _items(context)
+              FutureBuilder(
+                future: getDepartments(),
+                builder: (context, snapshot){
+                  final Departments _snapshot = snapshot.data;
+                  if (snapshot.hasData) {
+                    List<Widget> _row = [];
 
-              ),
-              _header(context, title: "Abarrotes", buttonTitle: "Ver más", buttonAction: (){Navigator.pushNamed(context, "/next");}),
-              SizedBox(
-                  height: 250,
-                  child: _items(context)
+                    _snapshot.dataReturn.forEach((actual){
+                      _row.add(_header(context, title: actual.name, buttonTitle: "Ver más", buttonAction: (){}),);
+                      _row.add(FutureBuilder(
+                        future: getProductFromDepartament(departments: actual.name),
+                        builder: (context, snapshot){
+                          final Products _snapshot = snapshot.data;
+                          if(snapshot.hasData){
+                            return SizedBox(height: 250, child: _items(context, _snapshot));
+                          } else if (snapshot.hasError) {
+                            return Text("${snapshot.error}");
+                          }
+                          return Padding( padding: EdgeInsets.all(40), child: SizedBox(height: 40, child: FittedBox( child: CircularProgressIndicator(), fit: BoxFit.fitHeight,)),);
 
-              ),
-              _header(context, title: "Salud", buttonTitle: "Ver más", buttonAction: (){Navigator.pushNamed(context, "/next");}),
-              SizedBox(
-                  height: 250,
-                  child: _items(context)
+                        },
+                      ));
+                    });
+                    return Column(children: _row,);
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
+                  }
 
+                  // Por defecto, muestra un loading spinner
+                  return Padding( padding: EdgeInsets.all(40), child: SizedBox(height: 40, child: FittedBox( child: CircularProgressIndicator(), fit: BoxFit.fitHeight,)),);
+
+                },
               )
-
-
-
             ],
           ),
         )
     );
   }
-
   void addToCart(){
-    setState(() {
-      numberItems += 1;
-    });
+    setState(() {numberItems += 1;});
   }
   void deleteAll(){
-    setState(() {
-      numberItems = 0;
-    });
+    setState(() {numberItems = 0;});
   }
   Widget _header(BuildContext context, {@required String title, String buttonTitle, buttonAction: Function}){
     return ListTile(
@@ -99,68 +102,35 @@ class _HomeContainerState extends State<HomeContainer> {
     );
   }
 
-  Widget _items(BuildContext context) {
-    return ListView.builder(
-      itemCount: 8,
-      itemBuilder: (BuildContext context, int index) {
-        return  Container(
-            width: 200,
-            child: Card(
-              child: Column(
-                children: <Widget>[
-                  Expanded(child: defaultImageNetwork(context,'https://underthebridge.co.uk/wp-content/uploads/2014/03/Example-main-image1.jpg')),
-                  Text("Producto de ejemplo"),
-                  Text("\$200"),
-                  Padding(
-                    child: OutlineButton(onPressed: addToCart, child: Text("Agregar al carrito", textAlign: TextAlign.center,), ),
-                    padding: EdgeInsets.symmetric(vertical: 6),
-                  )
-                ],
-              ),
+  Widget _items(BuildContext context, Products data, {Function onTap}) {
 
-            ),
+    return ListView.builder(
+      itemCount: data.dataReturn.length,
+      itemBuilder: (BuildContext context, int index) {
+        return GestureDetector(
+            onTap: (){
+              Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (context) => ProductPreviewContainer(data: data.dataReturn[index],)));
+            },
+            child: Container(
+              width: 200,
+              child: Card(
+                child: Column(
+                  children: <Widget>[
+                    Expanded(child: defaultImageNetwork(context, data.dataReturn[index].image)),
+                    Text(data.dataReturn[index].name),
+                    Text("\$ ${data.dataReturn[index].price}"),
+                    Padding(
+                      child: OutlineButton(onPressed: addToCart, child: Text("Agregar al carrito", textAlign: TextAlign.center,), ),
+                      padding: EdgeInsets.symmetric(vertical: 6),
+                    )
+                  ],
+                ),
+              ),
+            )
         );
       },
       scrollDirection: Axis.horizontal,
 
     );
   }
-}
-class NavigationFinish extends StatelessWidget{
-  const NavigationFinish({ Key key, this.destination }) : super(key: key);
-
-  final Destination destination;
-
-  @override
-  Widget build(BuildContext context) {
-    const List<int> shades = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-
-    return Scaffold(
-        backgroundColor: destination.color[50],
-        appBar: AppBar(),
-        extendBodyBehindAppBar: true,
-        body: SizedBox.expand(
-          child: ListView.builder(
-            itemCount: shades.length,
-            itemBuilder: (BuildContext context, int index) {
-              return SizedBox(
-                height: 128,
-                child: Card(
-                  color: destination.color[shades[index]].withOpacity(0.25),
-                  child: InkWell(
-                    onTap: () {
-                    },
-                    child: Center(
-                      child: Text('Item $index', style: Theme.of(context).primaryTextTheme.display1),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        )
-    );
-  }
-
-
 }
