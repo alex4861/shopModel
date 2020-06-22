@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:shopmodel/Home/View/HomeNavigation.dart';
+import 'package:shopmodel/MyOrders/View/MyOrdersNavigations.dart';
 import 'package:shopmodel/Profile/View/ProfileNavigation.dart';
 import '../../Home/View/HomeContainer.dart';
 
@@ -155,7 +156,7 @@ class _MainContainerState extends State<MainContainer>  with TickerProviderState
   final List<Destination> _children = [
     Destination('Inicio', Icons.home, Colors.teal,0),
     Destination('Carro', Icons.shopping_basket, Colors.cyan,1, ),
-    Destination('Lista de deseos', Icons.favorite, Colors.orange,2),
+    Destination('Mis pedidos', Icons.turned_in, Colors.orange,2),
     Destination('Mi cuenta', Icons.account_circle, Colors.blue,3)
   ];
 
@@ -174,7 +175,14 @@ class _MainContainerState extends State<MainContainer>  with TickerProviderState
       case 1:
         return Scaffold(appBar: AppBar(),);
       case 2:
-        return Scaffold(appBar: AppBar(),);
+        return MyOrdersNavigation(
+          destination: destination,
+          appName: widget.appName,
+          navigatorKey: _navigatorKeys[destination.index],
+          onNavigation: () {
+            _hide.forward();
+          },
+        );
       case 3:
         return ProfileNavigation(
           destination: destination,
