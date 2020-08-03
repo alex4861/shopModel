@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 
 
 const double CAMERA_ZOOM = 16;
@@ -25,6 +25,9 @@ class _MapsNavigationState extends State<MapsNavigation>{
 // for my custom icons
   BitmapDescriptor sourceIcon;
   BitmapDescriptor destinationIcon;
+  Position currentLocation;
+  Geolocator location;
+
 
   @override
   void initState() {
@@ -34,19 +37,15 @@ class _MapsNavigationState extends State<MapsNavigation>{
   }
 
   void setInitialPosition() async{
-    location = new Location();
-    currentLocation = await location.getLocation();
+    location = Geolocator();
+    var locationOptions = LocationOptions(accuracy: LocationAccuracy.bestForNavigation, distanceFilter: 10);
 
-    location.onLocationChanged.listen((LocationData cLoc) {
-      // cLoc contains the lat and long of the
-      // current user's position in real time,
-      // so we're holding on to it
+    currentLocation = await location.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    location.getPositionStream(locationOptions).listen((cLoc) {
       currentLocation = cLoc;
       updatePinOnMap();
-    });
-    destinationLocation = LocationData.fromMap({
-      "latitude": DEST_LOCATION.latitude,
-      "longitude": DEST_LOCATION.longitude
+
     });
 
   }
@@ -87,15 +86,12 @@ class _MapsNavigationState extends State<MapsNavigation>{
 
   void setSourceAndDestinationIcons() async {
     sourceIcon = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(devicePixelRatio: 2.5),
+        ImageConfiguration(devicePixelRatio: 0.5),
         'assets/images/ubicacion.png');
     destinationIcon = await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(devicePixelRatio: 0.5),
         'assets/images/ubicacion.png');
   }
-  LocationData currentLocation;
-  LocationData destinationLocation;
-  Location location;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +99,7 @@ class _MapsNavigationState extends State<MapsNavigation>{
         zoom: CAMERA_ZOOM,
         tilt: CAMERA_TILT,
         bearing: CAMERA_BEARING,
-        target: LatLng(currentLocation.latitude, currentLocation.longitude)
+        target: LatLng(19.3299332, -99.0887086)
     );
     if (currentLocation != null) {
       initialCameraPosition = CameraPosition(
